@@ -6,7 +6,6 @@ import {
   readFile,
   readdir,
   rm,
-  symlink,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -27,7 +26,7 @@ let run = 0;
 function build(expectedError) {
   const result = spawnSync(
     process.execPath,
-    [join(root, "node_modules/astro/bin/astro.mjs"), "build"],
+    [join(sandbox, "node_modules/astro/bin/astro.mjs"), "build"],
     {
       cwd: sandbox,
       encoding: "utf8",
@@ -78,17 +77,27 @@ try {
     "astro-paper.config.ts",
     "tsconfig.json",
     "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
   ]) {
     await cp(join(root, path), join(sandbox, path), {
       recursive: true,
       filter: source => source !== join(root, "src/content/posts"),
     });
   }
-  await symlink(
-    join(root, "node_modules"),
-    join(sandbox, "node_modules"),
-    process.platform === "win32" ? "junction" : "dir"
+  // Astro's Linux CSS module resolution requires dependencies inside this root.
+  // Reuse the pnpm store, not a node_modules symlink to another checkout.
+  const pnpm = process.env.npm_execpath;
+  assert(pnpm, "Run this integration suite with pnpm test");
+  const install = spawnSync(
+    process.execPath,
+    [pnpm, "install", "--offline", "--frozen-lockfile"],
+    {
+      cwd: sandbox,
+      encoding: "utf8",
+    }
   );
+  assert.equal(install.status, 0, `${install.stdout}\n${install.stderr}`);
   await mkdir(join(sandbox, "src/content/posts"), { recursive: true });
   await write(".local/private-sentinel.md", "PRIVATE_PREPARATION_SENTINEL");
   await registry([]);
