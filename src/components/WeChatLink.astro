@@ -1,0 +1,17 @@
+---
+type Props = { url?: string };
+const { url } = Astro.props;
+---
+
+{
+  url && (
+    <a
+      class="text-accent underline underline-offset-4"
+      href={url}
+      rel="noopener noreferrer"
+      data-pagefind-ignore
+    >
+      阅读公众号版本
+    </a>
+  )
+}

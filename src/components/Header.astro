@@ -11,6 +11,9 @@ import LinkButton from "./LinkButton.astro";
 import { stripBase, stripLocale } from "@/utils/withBase";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
+import { getTopics } from "@/utils/getTopics";
+
+const hasTopics = (await getTopics()).length > 0;
 
 const { site, features } = config;
 
@@ -82,6 +85,18 @@ const isActive = (path: string) => {
             {t.nav.posts}
           </a>
         </li>
+        {
+          hasTopics && (
+            <li class="col-span-2">
+              <a
+                href={getRelativeLocaleUrl(locale, "topics")}
+                class:list={{ "active-nav": isActive("/topics") }}
+              >
+                专题
+              </a>
+            </li>
+          )
+        }
         <li class="col-span-2">
           <a
             href={getRelativeLocaleUrl(locale, "tags")}

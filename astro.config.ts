@@ -16,6 +16,7 @@ import config from "./astro-paper.config";
 
 export default defineConfig({
   site: config.site.url,
+  cacheDir: "./.astro/cache",
   base: "/blog-zh",
   trailingSlash: "always",
   integrations: [

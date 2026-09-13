@@ -27,6 +27,16 @@ pnpm preview
 
 提前批量备稿，按当日选定文章同步发布：博客上线并验证 URL → 公众号引用博客并发布 → 当天回填公众号公开链接 → 检查双向导航。未发文章继续保留私有状态。公众号失败或审核中时先核对记录，不重复发送，也不自动发布下一篇。
 
+## 专题与公众号入口
+
+`src/content/topics.json` 是专题与顺序的唯一来源，初始为空。每项包含 `slug`（稳定英文短名）、`title`、可选 `description` 和有序的 `posts` 数组。`posts` 填 Astro 内容 ID，即文章的相对路径去掉扩展名，例如 `series/first-post`，不是文章标题或完整 URL。同一文章可以被多个专题引用。
+
+专题入口为 `/blog-zh/topics/`，详情为 `/blog-zh/topics/<slug>/`。专题仅列出当前可公开的文章，空专题不生成详情或导航；坏引用、重复 slug 和重复文章引用会使构建失败。公开清单也不能提前写入私有稿件信息，应随当日文章逐篇更新。
+
+当公众号文章已发布且链接核验成功后，在对应博客文章 frontmatter 增加 `wechatURL`。只接受 `https://mp.weixin.qq.com/s/...` 短地址，或带 `__biz`、`mid`、`idx`、`sn` 的 `/s` 公开地址；后台管理地址不能使用。文章页和专题页自动显示“阅读公众号版本”，未填写时隐藏。
+
+`pnpm test` 在系统临时目录生成纯测试文章并构建，验证专题顺序、过滤、错误引用、公众号地址和子路径产物；测试文章不会进入站点源码或正式构建。真实文章发布前仍需人工核对两端的实际内容和链接。
+
 ## GitHub Pages
 
 目标地址：`https://sandynz.github.io/blog-zh/`。首次部署前，在 GitHub 仓库 Settings → Pages 将 Source 设为 **GitHub Actions**。

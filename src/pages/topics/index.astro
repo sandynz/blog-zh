@@ -1,0 +1,44 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Main from "@/components/Main.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import { getTopics } from "@/utils/getTopics";
+import config from "@/config";
+
+const topics = await getTopics();
+---
+
+<Layout title={`专题 | ${config.site.title}`}>
+  <Header />
+  <Breadcrumb />
+  <Main pageTitle="专题" pageDesc="按主题与建议顺序阅读。">
+    {topics.length === 0 && <p>暂无专题。</p>}
+    <ul class="space-y-8">
+      {
+        topics.map(topic => (
+          <li>
+            <h2 class="text-xl font-semibold">
+              <a
+                class="text-accent underline underline-offset-4"
+                href={getRelativeLocaleUrl(
+                  config.site.lang,
+                  `topics/${topic.slug}`
+                )}
+              >
+                {topic.title}
+              </a>
+            </h2>
+            {topic.description && <p class="mt-2">{topic.description}</p>}
+            <p class="text-muted-foreground mt-2">
+              {topic.posts.length} 篇文章
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </Main>
+  <Footer />
+</Layout>

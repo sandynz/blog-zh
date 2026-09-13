@@ -1,0 +1,57 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Main from "@/components/Main.astro";
+import WeChatLink from "@/components/WeChatLink.astro";
+import { getTopics, type Topic } from "@/utils/getTopics";
+import { getPostUrl } from "@/utils/getPostPaths";
+import config from "@/config";
+
+export async function getStaticPaths() {
+  return (await getTopics()).map(topic => ({
+    params: { slug: topic.slug },
+    props: { topic },
+  }));
+}
+type Props = { topic: Topic };
+const { topic } = Astro.props;
+---
+
+<Layout
+  title={`${topic.title} | ${config.site.title}`}
+  description={topic.description}
+>
+  <Header />
+  <nav class="app-layout mt-8" aria-label="面包屑">
+    <a
+      class="text-accent underline"
+      href={getRelativeLocaleUrl(config.site.lang, "topics")}>全部专题</a
+    >
+  </nav>
+  <Main pageTitle={topic.title} pageDesc={topic.description ?? ""}>
+    <p class="text-muted-foreground mb-6">
+      建议按以下顺序阅读，共 {topic.posts.length} 篇已发布文章。
+    </p>
+    <ol class="list-decimal space-y-8 ps-6">
+      {
+        topic.posts.map(post => (
+          <li>
+            <h2 class="text-xl font-semibold">
+              <a
+                class="text-accent underline underline-offset-4"
+                href={getPostUrl(post.id, post.filePath)}
+              >
+                {post.data.title}
+              </a>
+            </h2>
+            <p class="my-2">{post.data.description}</p>
+            <WeChatLink url={post.data.wechatURL} />
+          </li>
+        ))
+      }
+    </ol>
+  </Main>
+  <Footer />
+</Layout>

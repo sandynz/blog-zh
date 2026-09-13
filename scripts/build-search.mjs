@@ -8,9 +8,10 @@ for (const path of await readdir("dist", { recursive: true })) {
   if (!path.endsWith(".html")) continue;
   const content = await readFile(join("dist", path), "utf8");
   if (!/<main\b[^>]*\bdata-pagefind-body(?:[\s=>])/.test(content)) continue;
-  const url = content.match(/<link\s+rel="canonical"\s+href="([^"]+)"/);
-  if (!url) throw new Error(`Missing canonical URL: ${path}`);
-  articles.push({ content, url: new URL(url[1]).pathname });
+  // Pagefind adds the base inferred from its bundle URL in the browser.
+  // Store a site-relative path here to avoid /blog-zh/blog-zh/ results.
+  const url = `/${path.replaceAll("\\", "/").replace(/index\.html$/, "")}`;
+  articles.push({ content, url });
 }
 
 if (articles.length) {

@@ -2,6 +2,7 @@ import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
 import { glob } from "astro/loaders";
 import config from "@/config";
+import { isWeChatArticleURL } from "@/utils/wechatURL";
 
 export const BLOG_PATH = "src/content/posts";
 
@@ -21,6 +22,13 @@ const posts = defineCollection({
       canonicalURL: z.string().optional(),
       hideEditPost: z.boolean().optional(),
       timezone: z.string().optional(),
+      wechatURL: z
+        .string()
+        .refine(
+          isWeChatArticleURL,
+          "Expected a public HTTPS mp.weixin.qq.com/s article URL"
+        )
+        .optional(),
     }),
 });
 
